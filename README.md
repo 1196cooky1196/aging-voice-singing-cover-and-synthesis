@@ -1,9 +1,10 @@
 # aging-voice-singing-cover-and-synthesis
 
+
 ### 🧠 Model Architecture
 ```mermaid
 graph TD
-    %% --- 스타일 정의 ---
+    %% 스타일 정의
     classDef input fill:#e1bee7,stroke:#4a148c,stroke-width:2px;
     classDef gen fill:#bbdefb,stroke:#0d47a1,stroke-width:2px;
     classDef fake fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px;
@@ -50,8 +51,6 @@ graph TD
     FakeB --> AgeHead
     Teacher -.-> L_KD
     AgeHead -.-> L_KD
-
-
 
 ### 🔍 System Overview
 본 프로젝트는 비병렬(Unpaired) 데이터 환경에서 목소리의 **화자 고유성(Identity)은 유지**하면서 **나이(Age) 특성만 변환**하는 것을 목표로 합니다. 이를 위해 CycleGAN 베이스에 두 가지 핵심 제약 조건을 추가했습니다.
