@@ -51,7 +51,7 @@ graph TD
     Teacher -.-> L_KD
     AgeHead -.-> L_KD
 
-<br>
+
 
 ### 🔍 System Overview
 본 프로젝트는 비병렬(Unpaired) 데이터 환경에서 목소리의 **화자 고유성(Identity)은 유지**하면서 **나이(Age) 특성만 변환**하는 것을 목표로 합니다. 이를 위해 CycleGAN 베이스에 두 가지 핵심 제약 조건을 추가했습니다.
