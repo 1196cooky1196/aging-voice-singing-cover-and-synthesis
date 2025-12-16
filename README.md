@@ -1,58 +1,50 @@
 # aging-voice-singing-cover-and-synthesis
 
-### 🧠 Model Architecture (CycleGAN + KD + Age Constraint)
+### 🧠 Model Architecture (CycleGAN + KD + Speaker Consistency)
 ```mermaid
 graph TD
-    %% 스타일 정의
-    classDef input fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
-    classDef gen fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef fake fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef frozen fill:#eeeeee,stroke:#616161,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef student fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
-    classDef loss fill:#ffffff,stroke:#ff0000,stroke-width:2px,stroke-dasharray: 5 5;
+    %% --- 스타일 정의 (가독성 높임) ---
+    classDef input fill:#e1bee7,stroke:#4a148c,stroke-width:2px,color:#000;
+    classDef gen fill:#bbdefb,stroke:#0d47a1,stroke-width:2px,color:#000;
+    classDef fake fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px,color:#000;
+    classDef frozen fill:#f5f5f5,stroke:#616161,stroke-width:2px,stroke-dasharray: 5 5,color:#000;
+    classDef loss fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000;
 
-    %% 1. 입력 데이터
-    InputA(🎤 Input A<br>Youth Voice):::input
-    InputB(🎤 Input B<br>Aged Voice):::input
-
-    %% 2. CycleGAN Main Loop
-    subgraph CycleGAN [CycleGAN Backbone]
-        direction TB
-        GA2B[Generator A→B]:::gen
-        GB2A[Generator B→A]:::gen
-        FakeB[⚡ Fake B<br>Converted Aged Voice]:::fake
-        RecA[🔄 Reconstructed A]:::fake
+    %% --- 1. 메인 흐름 (CycleGAN) ---
+    subgraph Main Flow
+        InputA(🎤 Input A<br>Youth Voice):::input
+        G_AB[Generator A→B]:::gen
+        FakeB(⚡ Fake B<br>Converted Aged Voice):::fake
+        G_BA[Generator B→A]:::gen
+        RecA(🔄 Reconstructed A):::fake
     end
 
-    %% Flow 연결
-    InputA --> GA2B --> FakeB --> GB2A --> RecA
-    
-    %% 3. Speaker Consistency (화자 유지)
-    subgraph Spk_Consist [Speaker Consistency]
+    InputA --> G_AB --> FakeB --> G_BA --> RecA
+
+    %% --- 2. 제약 조건 (Losses & Guidance) ---
+    subgraph Guidance Modules
         SE[Speaker Encoder<br>(Frozen)]:::frozen
-        StyleA[Style Vector A]
-        StyleFake[Style Vector Fake]
-    end
-    InputA --> SE --> StyleA
-    FakeB --> SE --> StyleFake
-    StyleA -.-> |"📉 Cosine Sim Loss<br>(Keep Identity)"| StyleFake
-    class StyleA,StyleFake loss
-
-    %% 4. Knowledge Distillation (나이 변환)
-    subgraph KD_Module [Age Knowledge Distillation]
-        direction TB
-        AgeHead[Age Head<br>(Student)]:::student
-        Teacher[Keras Teacher<br>(Pre-trained Age Classifier)]:::frozen
-        Stats[Feature Stats<br>(111 dim)]
+        Teacher[Keras Teacher Model<br>(Frozen)]:::frozen
+        AgeHead[Age Head<br>(Student Trainable)]:::gen
     end
 
-    %% KD 연결
-    FakeB --> AgeHead
-    FakeB --> |Calc Stats| Stats --> Teacher
-    AgeHead -.-> |"📉 Grouped CE Loss<br>(Force Target Age)"| AgeHead
-    Teacher -.-> |"📉 KD Loss<br>(Mimic Teacher)"| AgeHead
-    
+    subgraph Losses
+        Loss_Cycle(Cycle Consistency Loss):::loss
+        Loss_ID(Speaker Identity Loss):::loss
+        Loss_KD(Age Knowledge Distillation Loss):::loss
+    end
+
+    %% --- 연결선 (흐름 및 Loss 계산) ---
     %% Cycle Loss
-    RecA -.-> |"📉 Cycle Loss (L1)"| InputA
-    class RecA loss
+    InputA -.-> Loss_Cycle
+    RecA -.-> Loss_Cycle
+
+    %% Speaker Identity Loss (화자 유지)
+    InputA --> SE
+    FakeB --> SE
+    SE -.-> Loss_ID
+
+    %% Knowledge Distillation (나이 변환)
+    FakeB --> Teacher -.-> Loss_KD
+    FakeB --> AgeHead -.-> Loss_KD
 
