@@ -1,9 +1,11 @@
 # aging-voice-singing-cover-and-synthesis
 
+# aging-voice-singing-cover-and-synthesis
+
 ### 🧠 Model Architecture
 ```mermaid
 graph TD
-    %% 스타일 정의
+    %% --- 스타일 정의 ---
     classDef input fill:#e1bee7,stroke:#4a148c,stroke-width:2px;
     classDef gen fill:#bbdefb,stroke:#0d47a1,stroke-width:2px;
     classDef fake fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px;
