@@ -56,17 +56,3 @@ graph TD
     RecA -.-> |"📉 Cycle Loss (L1)"| InputA
     class RecA loss
 
-### 🔎 다이어그램 설명 
-코드가 복잡해 보이지만, 핵심은 **3가지 Loss**가 서로 견제하며 학습하는 구조입니다. 면접 때 이 그림을 띄워놓고 이렇게 설명하면 됩니다.
-
-1.  **CycleGAN Backbone (파란색):**
-    * 기본적인 A → B → A 변환을 수행하며, `Cycle Loss`를 통해 원래 목소리로 복구 가능한지 확인합니다.
-2.  **Speaker Consistency (회색/점선):**
-    * `Speaker Encoder`는 학습되지 않는(Frozen) 상태로 둡니다.
-    * 변환된 목소리(`Fake B`)가 원래 목소리(`Input A`)의 **화자 특성(Identity)을 잃어버리지 않았는지** 코사인 유사도로 감시합니다. (이게 있어서 목소리가 안 깨지는 겁니다.)
-3.  **Knowledge Distillation (주황색):**
-    * `Keras Teacher`는 이미 나이를 잘 맞추는 모델입니다.
-    * 우리의 `Generator`가 만든 목소리를 Teacher에게 보여주고, **"이거 50대 목소리 맞아?"** 라고 검사받습니다(`KD Loss`).
-    * 동시에 `Age Head`(Student)를 통해 강제로 나이 그룹(Grouped CE)을 맞추도록 학습합니다.
-
-이 구조도는 `train.py`의 `CycleGAN++(patched)` 로직을 정확하게 시각화한 것입니다.
