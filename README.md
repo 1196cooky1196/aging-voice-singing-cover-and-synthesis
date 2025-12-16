@@ -1,7 +1,7 @@
 # aging-voice-singing-cover-and-synthesis
 
 ### 🧠 Model Architecture
-```mermaid
+~~~mermaid
 graph TD
     %% 스타일 정의
     classDef input fill:#e1bee7,stroke:#4a148c,stroke-width:2px;
@@ -11,46 +11,43 @@ graph TD
     classDef loss fill:#ffcdd2,stroke:#c62828,stroke-width:2px;
 
     %% 1) Main Flow (CycleGAN)
-    subgraph Main_Flow ["Main Flow"]
+    subgraph Main_Flow["Main Flow"]
         InputA("Input A (Youth Voice)"):::input
-        G_AB["Generator A → B"]:::gen
+        G_AB["Generator A -> B"]:::gen
         FakeB("Fake B (Aged Voice)"):::fake
-        G_BA["Generator B → A"]:::gen
+        G_BA["Generator B -> A"]:::gen
         RecA("Reconstructed A"):::fake
     end
 
     InputA --> G_AB --> FakeB --> G_BA --> RecA
 
     %% 2) Guidance Modules (Frozen & Student)
-    subgraph Guidance ["Guidance Modules"]
+    subgraph Guidance["Guidance Modules"]
         SE["Speaker Encoder (Frozen)"]:::frozen
         Teacher["Keras Teacher (Frozen)"]:::frozen
         AgeHead["Age Head (Student)"]:::gen
     end
 
     %% 3) Loss Functions
-    subgraph Loss_Function ["Loss Functions"]
+    subgraph Loss_Function["Loss Functions"]
         L_Cyc["Cycle Loss"]:::loss
         L_ID["Speaker ID Loss"]:::loss
         L_KD["Age KD Loss"]:::loss
     end
 
     %% --- Connections ---
-    %% Cycle Loss
     InputA -.-> L_Cyc
     RecA  -.-> L_Cyc
 
-    %% Speaker Identity
     InputA --> SE
-    FakeB  --> SE
+    FakeB --> SE
     SE -.-> L_ID
 
-    %% Knowledge Distillation
     FakeB --> Teacher
     FakeB --> AgeHead
     Teacher -.-> L_KD
     AgeHead -.-> L_KD
-```
+~~~
 
 ### 🔍 System Overview
 본 프로젝트는 비병렬(Unpaired) 데이터 환경에서 목소리의 **화자 고유성(Identity)은 유지**하면서 **나이(Age) 특성만 변환**하는 것을 목표로 합니다. 이를 위해 CycleGAN 베이스에 두 가지 핵심 제약 조건을 추가했습니다.
@@ -77,7 +74,7 @@ graph TD
   - **Domain B (Target):** 40~60대 중장년 가수 30명
 - **Preprocessing:**
   - 모든 음원은 16kHz로 리샘플링되었습니다.
-  - 무음 구간(Silence)을 제거한 후, 학습 효율을 위해 **5초(5.0s) 단위로 슬라이싱(Slicing)** 처리하였습니다.
+  - 무음 구간(Silence) 제거 후, 학습 효율을 위해 **5초(5.0s) 단위로 슬라이싱(Slicing)** 처리하였습니다.
 
 > **⚠️ Copyright Notice**  
 > 본 프로젝트에 사용된 데이터셋은 저작권 문제로 인해 본 리포지토리에 포함되지 않습니다.  
